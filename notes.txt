@@ -139,3 +139,12 @@ urlpatterns = [
     path('<int:post_id>/update/', post_update),
     path('<int:post_id>/delete/', post_delete),
 ]
+
+//python manage.py shell
+import posts.models import Post
+post = Post.objects.all()   //to display all fields
+post = Post.objects.all().first()   //to display first record
+post = Post.objects.all().last()   //to display last record
+Post.save()     //to save 
+Post.objects.get(id=1)  //to display record according to id number
+Post.objects.create(title="This is a post") //creating a post using shell
