@@ -1,0 +1,141 @@
+models:
+-------
+from django.db import models    //model module
+
+class Post(models.Model):
+    title = models.CharField(max_length=50)
+    content = models.TextField(blank=True)
+
+    def __str__(self):
+        return self.title
+
+
+forms:
+-------
+from django import forms    //form module
+from .models import Post
+
+class PostForm(forms.ModelForm):
+    class Meta:
+        model = Post
+        fields = [
+            'title',
+            'content'
+        ]
+
+//HTML 
+------
+post_lists
+----------
+<h1>Welcome to post lists page</h1>
+<ul>
+{% for post in post_lists %}
+    <li>{{ post }}</li>
+{% endfor %}
+</ul>
+
+post_detail
+-----------
+<h3>{{ post.title }}</h3>
+<p>{{ post.content }}</p>
+
+post_create
+------------
+<h1>Welcome to post {{ form_type }} form</h1>
+<form action="." method="post">
+    {# 'as_p' means as paragraph  #}
+    {% csrf_token %}
+    {{ form.as_p }} 
+    <button type="submit" class="btn btn-primary">Submit</button>
+</form>
+
+post_delete
+------------
+<h1>Welcome to post {{ form_type }} form</h1>
+<form action="." method="post">
+    {# 'as_p' means as paragraph  #}
+    {% csrf_token %}
+    {{ form.as_p }} 
+    <button type="submit" class="btn btn-primary">Submit</button>
+</form>
+
+// To page redirect
+-------------------
+from django.http import HttpResponseRedirect    //page redirect module
+
+//To use template or HTML file
+------------------------------
+from django.shortcuts import render     //html page loading module
+
+views
+-----
+from django.http import HttpResponseRedirect
+from django.shortcuts import render
+
+from .models import Post
+from .forms import PostForm
+
+
+# Create your views here.
+def post_lists(request):
+    posts = Post.objects.all()
+    context = {
+        'post_lists': posts
+    }
+    return render(request, "post_lists.html", context)
+
+
+def post_detail(request, post_id):
+    post = Post.objects.get(id=post_id)
+    context = {
+        'post': post
+    }
+    return render(request, "post_detail.html", context)
+
+
+def post_create(request):
+    form = PostForm(request.POST or None)
+    if form.is_valid():
+        form.save()
+        return HttpResponseRedirect('/posts')
+
+    context = {
+        'form': form,
+        'form_type': 'Create'
+    }
+
+    return render(request, "post_create.html", context)
+
+
+def post_update(request, post_id):
+    post = Post.objects.get(id=post_id)
+    form = PostForm(request.POST or None, instance=post)
+    if form.is_valid():
+        form.save()
+        return HttpResponseRedirect('/posts')
+
+    context = {
+        'form': form,
+        'form_type': 'Update'
+    }
+    return render(request, "post_update.html", context)
+
+
+def post_delete(request, post_id):
+    post = Post.objects.get(id=post_id)
+    post.delete()
+    return HttpResponseRedirect('/posts')
+
+urls:
+-----
+from django.urls import path
+
+from . views import post_lists, post_detail, post_create, post_update, post_delete
+
+urlpatterns = [
+    path('', post_lists),
+    path('create/', post_create),
+    path('<int:post_id>/', post_detail),
+    path('<int:post_id>/update/', post_update),
+    path('<int:post_id>/delete/', post_delete),
+]
