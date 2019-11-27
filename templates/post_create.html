@@ -1,0 +1,7 @@
+<h1>Welcome to post {{ form_type }} form</h1>
+<form method="post" action=".">
+    {# 'as_p' means as paragraph  #}
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Create Post</button>
+</form>
